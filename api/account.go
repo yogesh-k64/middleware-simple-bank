@@ -2,15 +2,16 @@ package api
 
 import (
 	"database/sql"
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/lib/pq"
 	db "github.com/yogesh-k64/middleware-simple-bank/db/sqlc"
+	"github.com/yogesh-k64/middleware-simple-bank/token"
 )
 
 type createAccountReq struct {
-	Owner    string `json:"owner" binding:"required"`
 	Currency string `json:"currency" binding:"required,oneof=INR USD"`
 }
 
@@ -30,8 +31,10 @@ func (server Server) createAccount(ctx *gin.Context) {
 		return
 	}
 
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+
 	arg := db.CreateAccountParams{
-		Owner:    req.Owner,
+		Owner:    authPayload.UserName,
 		Currency: req.Currency,
 		Balance:  0,
 	}
@@ -60,12 +63,19 @@ func (server Server) getAccount(ctx *gin.Context) {
 	}
 
 	account, err := server.store.GetAccount(ctx, req.ID)
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			ctx.JSON(http.StatusNotFound, errorHandler(err))
 			return
 		}
 		ctx.JSON(http.StatusInternalServerError, errorHandler(err))
+		return
+	}
+
+	if account.Owner != authPayload.UserName {
+		err := errors.New("account doesn't belong to the authenticated owner")
+		ctx.JSON(http.StatusUnauthorized, errorHandler(err))
 		return
 	}
 
@@ -78,8 +88,10 @@ func (server Server) listAccounts(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorHandler(err))
 		return
 	}
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 
 	arg := db.ListAccountsParams{
+		Owner:  authPayload.UserName,
 		Limit:  req.Limit,
 		Offset: (req.PageNo - 1) * req.Limit,
 	}
