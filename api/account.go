@@ -2,7 +2,6 @@ package api
 
 import (
 	"database/sql"
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -46,7 +45,7 @@ func (server Server) createAccount(ctx *gin.Context) {
 				return
 			}
 		}
-		ctx.JSON(http.StatusInternalServerError, errorHandler(err))	
+		ctx.JSON(http.StatusInternalServerError, errorHandler(err))
 		return
 	}
 
@@ -79,7 +78,7 @@ func (server Server) listAccounts(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorHandler(err))
 		return
 	}
-	fmt.Printf("req: %#v\n", req)
+
 	arg := db.ListAccountsParams{
 		Limit:  req.Limit,
 		Offset: (req.PageNo - 1) * req.Limit,

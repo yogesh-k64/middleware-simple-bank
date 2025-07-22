@@ -1,14 +1,17 @@
 package utils
 
 import (
-	// _ "github.com/lib/pq"
+	"time"
+
 	"github.com/spf13/viper"
 )
 
 type Config struct {
-	DBDriver      string `mapstructure:"DB_DRIVER"`
-	DBSource      string `mapstructure:"DB_SOURCE"`
-	ServerAddress string `mapstructure:"SERVER_ADDRESS"`
+	DBDriver            string `mapstructure:"DB_DRIVER"`
+	DBSource            string `mapstructure:"DB_SOURCE"`
+	ServerAddress       string `mapstructure:"SERVER_ADDRESS"`
+	TokenSymmentricKey  string `mapstructure:"TOKEN_SYMMENTRIC_KEY"`
+	AccessTokenDuration time.Duration `mapstructure:"ACCESS_TOKEN_DURATION"`
 }
 
 func LoadConfig(path string) (config Config, err error) {
