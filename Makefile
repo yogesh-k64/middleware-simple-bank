@@ -2,7 +2,7 @@ test:
 	echo hello
 
 postgres:
-	docker run --name postgres17 -e POSTGRES_USER=root -p 5432:5432 -e POSTGRES_PASSWORD=1234 -d postgres:17-alpine
+	docker run --name postgres17 --network bank-network -e POSTGRES_USER=root -p 5432:5432 -e POSTGRES_PASSWORD=1234 -d postgres:17-alpine
 
 createdb:
 	docker exec -it postgres17 createdb --user=root --owner=root simple_bank
